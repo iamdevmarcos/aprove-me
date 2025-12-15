@@ -46,6 +46,7 @@ export function EditAssignorDrawer({
         assignor.document.length <= 11
           ? Mask.CPF(assignor.document)
           : Mask.CNPJ(assignor.document)
+          
       reset({
         name: assignor.name,
         document: documentFormatted,

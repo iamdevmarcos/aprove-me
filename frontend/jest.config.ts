@@ -29,7 +29,6 @@ const config: Config = {
     "/node_modules/",
     "/.next/",
     "/src/features/payables/components/__tests__/",
-    "/src/features/assignors/components/__tests__/",
   ],
 }
 
