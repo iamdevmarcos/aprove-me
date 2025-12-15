@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model BatchJob {
+  id            String          @id @default(uuid())
+  fileName      String
+  filePath      String?
+  totalItems    Int
+  processedItems Int            @default(0)
+  successCount  Int             @default(0)
+  failureCount  Int             @default(0)
+  status        BatchJobStatus  @default(PENDING)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  items         BatchItem[]
+
+  @@map("batch_jobs")
+}
+
+enum BatchJobStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  PARTIALLY_FAILED
+}
+
+model BatchItem {
+  id            String            @id @default(uuid())
+  batchJobId    String
+  batchJob      BatchJob          @relation(fields: [batchJobId], references: [id], onDelete: Cascade)
+  payableData   String
+  status        BatchItemStatus   @default(PENDING)
+  retryCount    Int               @default(0)
+  errorMessage  String?
+  processedAt   DateTime?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("batch_items")
+}
+
+enum BatchItemStatus {
+  PENDING
+  PROCESSING
+  PROCESSED
+  FAILED
+  DEAD_LETTER
+}
+
+model DeadLetterItem {
+  id            String   @id @default(uuid())
+  batchJobId    String
+  batchItemId   String
+  payableData   String
+  errorMessage  String
+  retryCount    Int
+  createdAt     DateTime @default(now())
+  notifiedAt    DateTime?
+
+  @@map("dead_letter_items")
+}
