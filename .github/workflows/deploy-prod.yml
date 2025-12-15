@@ -48,23 +48,37 @@ jobs:
           gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
 
       - name: Build and push backend images
-        working-directory: backend
         run: |
           REGISTRY="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/aproveme-repo"
 
-          docker build -t "${REGISTRY}/api-gateway:latest" ./services/api-gateway
+          docker build \
+            -f backend/services/api-gateway/Dockerfile \
+            -t "${REGISTRY}/api-gateway:latest" \
+            backend/services/api-gateway
           docker push "${REGISTRY}/api-gateway:latest"
 
-          docker build -t "${REGISTRY}/auth-service:latest" ./services/auth-service
+          docker build \
+            -f backend/services/auth-service/Dockerfile \
+            -t "${REGISTRY}/auth-service:latest" \
+            backend/services/auth-service
           docker push "${REGISTRY}/auth-service:latest"
 
-          docker build -t "${REGISTRY}/integrations-service:latest" ./services/integrations-service
+          docker build \
+            -f backend/services/integrations-service/Dockerfile \
+            -t "${REGISTRY}/integrations-service:latest" \
+            backend/services/integrations-service
           docker push "${REGISTRY}/integrations-service:latest"
 
-          docker build -t "${REGISTRY}/batch-service:latest" ./services/batch-service
+          docker build \
+            -f backend/services/batch-service/Dockerfile \
+            -t "${REGISTRY}/batch-service:latest" \
+            backend/services/batch-service
           docker push "${REGISTRY}/batch-service:latest"
 
-          docker build -t "${REGISTRY}/notification-service:latest" ./services/notification-service
+          docker build \
+            -f backend/services/notification-service/Dockerfile \
+            -t "${REGISTRY}/notification-service:latest" \
+            backend/services/notification-service
           docker push "${REGISTRY}/notification-service:latest"
 
       - name: Build and push frontend image
