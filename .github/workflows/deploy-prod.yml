@@ -47,56 +47,6 @@ jobs:
         run: |
           gcloud auth configure-docker "${GCP_REGION}-docker.pkg.dev" --quiet
 
-      - name: Build and push backend images
-        run: |
-          REGISTRY="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/aproveme-repo"
-
-          echo "Workspace contents:"
-          pwd
-          ls
-          echo "Backend services:"
-          ls backend/services
-          echo "API Gateway service contents:"
-          ls backend/services/api-gateway
-
-          docker build \
-            -f backend/services/api-gateway/Dockerfile \
-            -t "${REGISTRY}/api-gateway:latest" \
-            backend/services/api-gateway
-          docker push "${REGISTRY}/api-gateway:latest"
-
-          docker build \
-            -f backend/services/auth-service/Dockerfile \
-            -t "${REGISTRY}/auth-service:latest" \
-            backend/services/auth-service
-          docker push "${REGISTRY}/auth-service:latest"
-
-          docker build \
-            -f backend/services/integrations-service/Dockerfile \
-            -t "${REGISTRY}/integrations-service:latest" \
-            backend/services/integrations-service
-          docker push "${REGISTRY}/integrations-service:latest"
-
-          docker build \
-            -f backend/services/batch-service/Dockerfile \
-            -t "${REGISTRY}/batch-service:latest" \
-            backend/services/batch-service
-          docker push "${REGISTRY}/batch-service:latest"
-
-          docker build \
-            -f backend/services/notification-service/Dockerfile \
-            -t "${REGISTRY}/notification-service:latest" \
-            backend/services/notification-service
-          docker push "${REGISTRY}/notification-service:latest"
-
-      - name: Build and push frontend image
-        working-directory: frontend
-        run: |
-          REGISTRY="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/aproveme-repo"
-
-          docker build -t "${REGISTRY}/frontend:latest" .
-          docker push "${REGISTRY}/frontend:latest"
-
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
         with:
