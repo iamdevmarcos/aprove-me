@@ -38,6 +38,9 @@ interface DataTableProps<TData, TValue> {
   searchKey?: string
   searchPlaceholder?: string
   meta?: Record<string, unknown>
+  hideToolbar?: boolean
+  hideFooter?: boolean
+  pageSize?: number
 }
 
 export function DataTable<TData, TValue>({
@@ -46,6 +49,9 @@ export function DataTable<TData, TValue>({
   searchKey,
   searchPlaceholder = "Filtrar...",
   meta,
+  hideToolbar = false,
+  hideFooter = false,
+  pageSize = 15,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -67,7 +73,7 @@ export function DataTable<TData, TValue>({
     meta,
     initialState: {
       pagination: {
-        pageSize: 15,
+        pageSize,
       },
     },
     state: {
@@ -79,7 +85,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="w-full">
-      {(searchKey || table.getAllColumns().some((col) => col.getCanHide())) && (
+      {!hideToolbar && (searchKey || table.getAllColumns().some((col) => col.getCanHide())) && (
         <div className="flex items-center py-4">
           {searchKey && (
             <Input
@@ -186,30 +192,32 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="text-muted-foreground flex-1 text-sm">
-          {table.getFilteredRowModel().rows.length} resultado
-          {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}.
+      {!hideFooter && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <div className="text-muted-foreground flex-1 text-sm">
+            {table.getFilteredRowModel().rows.length} resultado
+            {table.getFilteredRowModel().rows.length !== 1 ? "s" : ""}.
+          </div>
+          <div className="space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              Próximo
+            </Button>
+          </div>
         </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Anterior
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Próximo
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
   )
 }
