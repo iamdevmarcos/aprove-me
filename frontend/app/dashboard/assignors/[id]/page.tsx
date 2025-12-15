@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/src/components/ui/accordion"
+import { CopyButton } from "@/src/components/ui/copy-button"
 
 export default function AssignorDetailsPage() {
   const params = useParams()
@@ -99,8 +100,15 @@ export default function AssignorDetailsPage() {
         <div className="space-y-4">
           <div className="space-y-2">
             <p className="text-sm font-medium text-black">ID completo</p>
-            <div className="inline-block rounded-md bg-neutral-900 px-4 py-2 font-mono text-base text-white dark:bg-neutral-100 dark:text-neutral-900 break-all">
-              {assignor.id}
+            <div className="flex items-center gap-2">
+              <div className="inline-block rounded-md bg-neutral-900 px-4 py-2 font-mono text-xs text-white dark:bg-neutral-100 dark:text-neutral-900 break-all">
+                {assignor.id}
+              </div>
+              <CopyButton
+                content={assignor.id}
+                size="sm"
+                aria-label="Copiar ID do cedente"
+              />
             </div>
           </div>
 

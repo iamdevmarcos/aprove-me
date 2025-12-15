@@ -5,6 +5,7 @@ import { ArrowUpDown, Eye, Pencil, Trash2 } from 'lucide-react'
 import { Button } from '@/src/components/ui/button'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar'
+import { CopyButton } from "@/src/components/ui/copy-button"
 import { Payable } from '../types'
 
 export const payablesColumns: ColumnDef<Payable>[] = [
@@ -25,8 +26,15 @@ export const payablesColumns: ColumnDef<Payable>[] = [
       const id = row.getValue<string>("id")
 
       return (
-        <div className="bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 font-mono text-sm px-3 py-1.5 rounded-md inline-block">
-          {id}
+        <div className="flex items-center gap-2">
+          <div className="bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 font-mono text-xs px-3 py-1.5 rounded-md inline-block max-w-[180px] truncate">
+            {id}
+          </div>
+          <CopyButton
+            content={id}
+            size="sm"
+            aria-label="Copiar ID do recebível"
+          />
         </div>
       )
     },

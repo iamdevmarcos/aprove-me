@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { payableBatchApi } from "../services/payable-batch-api"
-import type { BatchJobStatus, BatchDeadLetterItem } from "../types/batch"
-import { Button } from "@/src/components/ui/button"
+import type { BatchJobStatus } from "../types/batch"
 import {
   Table,
   TableBody,
@@ -26,7 +25,6 @@ const TERMINAL_STATUSES: BatchJobStatus["status"][] = [
 export function BatchStatusPanel({ batchJobId }: BatchStatusPanelProps) {
   const [status, setStatus] = useState<BatchJobStatus | null>(null)
   const [isPolling, setIsPolling] = useState(true)
-  const [isRetrying, setIsRetrying] = useState<string | null>(null)
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null
@@ -50,19 +48,6 @@ export function BatchStatusPanel({ batchJobId }: BatchStatusPanelProps) {
       if (intervalId) clearInterval(intervalId)
     }
   }, [batchJobId, isPolling])
-
-  const handleRetry = async (item: BatchDeadLetterItem) => {
-    if (!status) return
-    setIsRetrying(item.id)
-    try {
-      await payableBatchApi.retryItem(status.id, item.id)
-      const updated = await payableBatchApi.getStatus(status.id)
-      setStatus(updated)
-      setIsPolling(!TERMINAL_STATUSES.includes(updated.status))
-    } finally {
-      setIsRetrying(null)
-    }
-  }
 
   if (!status) return null
 
