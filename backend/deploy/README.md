@@ -1,111 +1,170 @@
-# 🐳 Docker Compose - Infraestrutura
+# Deployment
 
-## 📦 Serviços Configurados
+Este diretório contém a configuração de deploy da arquitetura de microserviços do projeto Aprove-me utilizando Docker Compose. A configuração orquestra múltiplos serviços backend, garantindo comunicação entre eles e gerenciamento de dependências.
 
-Ao rodar `docker-compose up`, os seguintes serviços serão iniciados:
+## Overview
 
-### 1. **API Gateway** (Porta 3001)
-- Ponto de entrada único para todas as requisições
-- Roteia requisições para os microserviços apropriados
-- Valida autenticação JWT
+A arquitetura é composta por microserviços independentes que se comunicam através de uma rede Docker isolada. Cada serviço possui responsabilidades específicas e pode ser escalado independentemente conforme necessário.
 
-### 2. **Auth Service** (Porta 3002)
-- Gerencia autenticação e autorização
-- Cria e valida tokens JWT
-- Banco: SQLite (`auth-db` volume)
+## Architecture
 
-### 3. **Integrations Service** (Porta 3003)
-- Gerencia Payables e Assignors
-- CRUD completo de pagáveis e cedentes
-- Banco: SQLite (`integrations-db` volume)
+### Services
 
-### 4. **Batch Service** (Porta 3004)
-- Processa grandes volumes de pagáveis em lote
-- Upload de arquivos CSV (até 10.000 itens)
-- Processamento assíncrono com filas
-- Banco: SQLite (`batch-db` volume)
+#### API Gateway (Porta 3001)
 
-### 5. **Notification Service** (Porta 3005)
-- Serviço simples de envio de notificações (simulado com logs)
-- Recebe requisições do Batch e de outros serviços para disparos de e-mail
+Serviço que funciona como BFF (Backend for Frontend), responsável por rotear requisições para os microserviços apropriados, gerenciar autenticação centralizada e fornecer uma interface unificada para consumo pelo frontend.
 
-### 6. **Redis** (Porta 6379)
-- Fila de processamento para Batch Service
-- Armazena jobs do BullMQ
-- Volume: `redis-data`
+- **Context**: `../services/api-gateway`
+- **Port**: `3001`
+- **Dependencies**: auth-service, integrations-service, notification-service
+- **Environment Variables**:
+  - `CORS_ORIGIN`: Origem permitida para CORS (padrão: `*`)
+  - `AUTH_SERVICE_URL`: URL do serviço de autenticação
+  - `INTEGRATIONS_SERVICE_URL`: URL do serviço de integrações
+  - `BATCH_SERVICE_URL`: URL do serviço de processamento em lote
+  - `NOTIFICATION_SERVICE_URL`: URL do serviço de notificações
 
-## 🚀 Como Usar
+#### Auth Service (Porta 3002)
 
-### Subir todos os serviços:
+Serviço responsável por gerenciar autenticação, autorização e tokens JWT.
+
+- **Context**: `../services/auth-service`
+- **Port**: `3002`
+- **Database**: SQLite (volume persistente `auth-db`)
+- **Environment Variables**:
+  - `JWT_SECRET`: Chave secreta para assinatura de tokens (padrão: `marcos-token`)
+  - `JWT_EXPIRATION`: Tempo de expiração do token JWT (padrão: `1m`)
+  - `JWT_REFRESH_EXPIRATION`: Tempo de expiração do refresh token (padrão: `7d`)
+  - `BCRYPT_SALT_ROUNDS`: Rodadas de salt para hash de senhas (padrão: `10`)
+
+#### Integrations Service (Porta 3003)
+
+Serviço responsável por gerenciar entidades de negócio (cedentes, recebíveis) e suas integrações.
+
+- **Context**: `../services/integrations-service`
+- **Port**: `3003`
+- **Database**: SQLite (volume persistente `integrations-db`)
+
+#### Batch Service (Porta 3004)
+
+Serviço responsável por processar operações em lote, utilizando filas Redis para gerenciamento assíncrono.
+
+- **Context**: `../services/batch-service`
+- **Port**: `3004`
+- **Database**: SQLite (volume persistente `batch-db`)
+- **Dependencies**: redis, integrations-service, notification-service
+- **Volumes**:
+  - `batch-db`: Dados do banco de dados
+  - `batch-uploads`: Arquivos enviados para processamento
+- **Environment Variables**:
+  - `REDIS_HOST`: Host do Redis (padrão: `redis`)
+  - `REDIS_PORT`: Porta do Redis (padrão: `6379`)
+  - `UPLOAD_PATH`: Caminho para armazenamento de uploads (padrão: `/app/uploads`)
+
+#### Notification Service (Porta 3005)
+
+Serviço responsável por enviar notificações e comunicação com sistemas externos.
+
+- **Context**: `../services/notification-service`
+- **Port**: `3005`
+
+#### Redis (Porta 6379)
+
+Servidor Redis utilizado para filas de processamento e cache.
+
+- **Image**: `redis:7-alpine`
+- **Port**: `6379`
+- **Persistence**: AOF (Append Only File) habilitado
+- **Volume**: `redis-data` para persistência de dados
+
+### Network
+
+Todos os serviços estão conectados à rede Docker `microservices-network` com driver bridge, permitindo comunicação interna entre containers através de nomes de serviço.
+
+### Volumes
+
+Volumes nomeados são utilizados para persistência de dados:
+
+- `auth-db`: Banco de dados do serviço de autenticação
+- `integrations-db`: Banco de dados do serviço de integrações
+- `batch-db`: Banco de dados do serviço de processamento em lote
+- `batch-uploads`: Arquivos de upload do serviço de processamento em lote
+- `redis-data`: Dados persistidos do Redis
+
+## Prerequisites
+
+- Docker >= 20.10
+- Docker Compose >= 2.0
+- Acesso aos diretórios dos serviços em `../services/`
+
+## Quick Start
+
+### 1. Configurar Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto ou exporte as variáveis necessárias:
+
+```bash
+export JWT_SECRET="seu-jwt-secret-aqui"
+export JWT_EXPIRATION="1h"
+export JWT_REFRESH_EXPIRATION="7d"
+export CORS_ORIGIN="https://seu-dominio.com"
+```
+
+### 2. Iniciar Todos os Serviços
+
 ```bash
 cd backend/deploy
 docker-compose up -d
 ```
 
-### Ver logs:
+O flag `-d` inicia os containers em modo detached (background).
+
+### 3. Verificar Status
+
+```bash
+docker-compose ps
+```
+
+### 4. Visualizar Logs
+
+Todos os serviços:
 ```bash
 docker-compose logs -f
 ```
 
-### Parar todos os serviços:
+Serviço específico:
 ```bash
-docker-compose down
+docker-compose logs -f api-gateway
 ```
 
-### Rebuild após mudanças:
+### Parar e Remover Volumes
+
+**Atenção**: Isso remove todos os dados persistidos.
+
+```bash
+docker-compose down -v
+```
+
+## Development
+
+### Rebuild After Code Changes
+
+Após alterações no código dos serviços, reconstrua as imagens:
+
 ```bash
 docker-compose up -d --build
 ```
 
-## 🔗 Endpoints
+### Acessar Container
 
-- **API Gateway**: http://localhost:3001
-- **Auth Service**: http://localhost:3002
-- **Integrations Service**: http://localhost:3003
-- **Batch Service**: http://localhost:3004
-- **Notification Service**: http://localhost:3005
-- **Redis**: localhost:6379
+Para acessar o shell de um container específico:
 
-## 📊 O que significa "Batch"?
-
-**Batch** = **Lote** em português
-
-O **Batch Service** processa pagáveis em **lotes** (grandes quantidades de uma vez), ao invés de processar um por um de forma síncrona.
-
-**Exemplo prático:**
-- ❌ **Sem Batch**: Cliente envia 10.000 pagáveis → API processa um por vez → demora muito, pode dar timeout
-- ✅ **Com Batch**: Cliente envia arquivo CSV com 10.000 pagáveis → API recebe, enfileira → processa assincronamente → notifica quando terminar
-
-**Por que "Batch"?**
-- Termo comum em sistemas de processamento
-- Significa processar múltiplos itens juntos
-- Usado em: batch processing, batch jobs, batch uploads
-
-## 🔄 Fluxo de Roteamento
-
-```
-Cliente → API Gateway (3001)
-  ├─ /integrations/auth → Auth Service (3002)
-  ├─ /integrations/payable → Integrations Service (3003)
-  ├─ /integrations/payable/batch → Batch Service (3004)
-  ├─ /notifications/send → Notification Service (3005)
-  └─ /integrations/assignor → Integrations Service (3003)
+```bash
+docker-compose exec api-gateway sh
 ```
 
-## 💾 Volumes (Persistência)
+### Executar Comandos no Container
 
-- `auth-db`: Banco do Auth Service
-- `integrations-db`: Banco do Integrations Service  
-- `batch-db`: Banco do Batch Service
-- `batch-uploads`: Arquivos CSV enviados
-- `redis-data`: Dados do Redis
-
-## 🔧 Variáveis de Ambiente
-
-Configure no `.env` ou diretamente no `docker-compose.yml`:
-
-- `CORS_ORIGIN`: Origem permitida para CORS
-- `JWT_SECRET`: Chave secreta para JWT
-- `JWT_EXPIRATION`: Tempo de expiração do token
-- `MAX_BATCH_ITEMS`: Máximo de itens por batch (padrão: 10000)
-- `MAX_FILE_SIZE`: Tamanho máximo do arquivo em bytes (padrão: 10MB)
+```bash
+docker-compose exec auth-service npm run prisma:migrate
+```
