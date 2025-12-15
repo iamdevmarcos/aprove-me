@@ -1,9 +1,10 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { authStorage } from '@/src/features/auth/utils/auth-storage';
 import { refreshTokenIfNeeded } from '../refresh-token';
+import { getApiBaseUrl } from '@/src/helpers/utils';
 
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,9 +14,14 @@ apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = authStorage.getToken();
-      if (token && !config.url?.includes('/auth')) {
+      const url = config.url ?? '';
+
+      const isAuthLogin = url.includes('/auth/login');
+      const isAuthRefresh = url.includes('/auth/refresh');
+
+      if (token && !isAuthLogin && !isAuthRefresh) {
         config.headers.Authorization = `Bearer ${token}`;
-      }
+      }      
     }
     
     return config;

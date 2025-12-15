@@ -9,7 +9,8 @@ import {
   ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { authApi, AuthApiError } from '../services/auth-api';
+import { authApi } from '../services/auth-api';
+import { AuthApiError } from '../utils/auth-api-error';
 import { authStorage } from '../utils/auth-storage';
 
 interface AuthContextData {

@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../../context/auth-context';
-import { AuthApiError } from '../../../services/auth-api';
+import { AuthApiError } from '../../../utils/auth-api-error';
 import { loginSchema, type LoginFormData } from '../../../validations/schemas';
 import { LoginFormUI } from '../presentational/login-form-ui';
 

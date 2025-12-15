@@ -8,6 +8,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+export function getApiBaseUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+}
+
 export function formatDocument(document: string): string {
   if (!document) return ""
   const clean = document.replace(/\D/g, "")
