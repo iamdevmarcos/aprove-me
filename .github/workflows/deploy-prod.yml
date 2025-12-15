@@ -51,6 +51,14 @@ jobs:
         run: |
           REGISTRY="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/aproveme-repo"
 
+          echo "Workspace contents:"
+          pwd
+          ls
+          echo "Backend services:"
+          ls backend/services
+          echo "API Gateway service contents:"
+          ls backend/services/api-gateway
+
           docker build \
             -f backend/services/api-gateway/Dockerfile \
             -t "${REGISTRY}/api-gateway:latest" \
