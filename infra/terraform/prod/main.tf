@@ -46,6 +46,18 @@ resource "google_compute_firewall" "prod_http" {
   source_ranges = ["0.0.0.0/0"]
 }
 
+resource "google_compute_firewall" "prod_ssh" {
+  name    = "${var.project_prefix}-prod-ssh"
+  network = google_compute_network.prod_vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
 resource "google_compute_instance" "prod_vm" {
   name         = "${var.project_prefix}-prod-vm"
   machine_type = var.machine_type
