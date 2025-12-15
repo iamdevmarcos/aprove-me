@@ -4,8 +4,8 @@ node_modules/
 coverage/
 .DS_Store
 
-infra/terraform/prod/.terraform/
-infra/terraform/prod/terraform.tfstate
-infra/terraform/prod/terraform.tfstate.backup
-
+prod/.terraform/
+prod/terraform.tfstate
+prod/terraform.tfstate.backup
+prod/terraform.tfvars
 
