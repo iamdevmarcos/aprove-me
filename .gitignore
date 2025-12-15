@@ -1,0 +1,12 @@
+node_modules/
+.next/
+.swc/
+coverage/
+.DS_Store
+
+# Terraform local state and cache
+infra/terraform/prod/.terraform/
+infra/terraform/prod/terraform.tfstate
+infra/terraform/prod/terraform.tfstate.backup
+
+

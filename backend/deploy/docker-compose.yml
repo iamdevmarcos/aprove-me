@@ -1,0 +1,129 @@
+services:
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - '3001:3001'
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - AUTH_SERVICE_URL=http://auth-service:3002
+      - INTEGRATIONS_SERVICE_URL=http://integrations-service:3003
+      - BATCH_SERVICE_URL=http://batch-service:3004
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3005
+    depends_on:
+      - auth-service
+      - integrations-service
+      - notification-service
+    networks:
+      - microservices-network
+
+  auth-service:
+    build:
+      context: ../services/auth-service
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: file:./dev.db
+    container_name: auth-service
+    ports:
+      - '3002:3002'
+    environment:
+      - PORT=3002
+      - DATABASE_URL=file:./dev.db
+      - JWT_SECRET=${JWT_SECRET:-marcos-token}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-1m}
+      - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
+      - BCRYPT_SALT_ROUNDS=${BCRYPT_SALT_ROUNDS:-10}
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    volumes:
+      - auth-db:/app/prisma
+    networks:
+      - microservices-network
+
+  integrations-service:
+    build:
+      context: ../services/integrations-service
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: file:./dev.db
+    container_name: integrations-service
+    ports:
+      - '3003:3003'
+    environment:
+      - PORT=3003
+      - DATABASE_URL=file:./dev.db
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+    volumes:
+      - integrations-db:/app/prisma
+    networks:
+      - microservices-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - microservices-network
+    command: redis-server --appendonly yes
+
+  batch-service:
+    build:
+      context: ../services/batch-service
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: file:./dev.db
+    container_name: batch-service
+    ports:
+      - '3004:3004'
+    environment:
+      - PORT=3004
+      - DATABASE_URL=file:./dev.db
+      - NODE_ENV=production
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - INTEGRATIONS_SERVICE_URL=http://integrations-service:3003
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3005
+      - UPLOAD_PATH=/app/uploads
+    volumes:
+      - batch-db:/app/prisma
+      - batch-uploads:/app/uploads
+    depends_on:
+      - redis
+      - integrations-service
+      - notification-service
+    networks:
+      - microservices-network
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports:
+      - '3005:3005'
+    environment:
+      - PORT=3005
+      - NODE_ENV=production
+    networks:
+      - microservices-network
+
+volumes:
+  auth-db:
+  integrations-db:
+  batch-db:
+  batch-uploads:
+  redis-data:
+
+networks:
+  microservices-network:
+    driver: bridge
+

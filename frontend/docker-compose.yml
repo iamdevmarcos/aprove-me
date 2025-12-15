@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aproveme-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      # Base URL da API (API Gateway). Em produção, ajuste para o host público correto se necessário.
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL-http://localhost:3001}
+      - NODE_ENV=production
+      - PORT=3000
+
+
