@@ -2,6 +2,22 @@
 
 Sistema de gerenciamento de recebíveis e cedentes desenvolvido com arquitetura de microserviços. A aplicação permite cadastro de cedentes, gestão de recebíveis e processamento em lote de operações.
 
+## Screenshots
+
+<div align="center">
+
+![Screenshot 1](./static-assets/01.png)
+
+![Screenshot 2](./static-assets/02.png)
+
+![Screenshot 3](./static-assets/03.png)
+
+![Screenshot 4](./static-assets/04.png)
+
+![Screenshot 5](./static-assets/05.png)
+
+</div>
+
 ## Overview
 
 O Aprove-me é uma plataforma para gerenciamento de recebíveis, composta por frontend web, backend com microserviços e infraestrutura como código. A arquitetura foi projetada para escalabilidade, manutenibilidade e separação clara de responsabilidades.
