@@ -7,8 +7,43 @@ import Link from "next/link"
 import { Assignor } from "../types"
 import { formatDocument } from "@/src/helpers/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
+import { CopyButton } from "@/src/components/ui/copy-button"
 
 export const assignorsColumns: ColumnDef<Assignor>[] = [
+  {
+    accessorKey: "id",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const id = row.getValue<string>("id")
+
+      return (
+        <div className="flex items-center gap-2">
+          <div className="bg-neutral-900 dark:bg-neutral-100 text-white dark:text-neutral-900 font-mono text-xs px-3 py-1.5 rounded-md inline-block max-w-[180px] truncate">
+            {id}
+          </div>
+          <CopyButton
+            content={id}
+            size="sm"
+            aria-label="Copiar ID do cedente"
+          />
+        </div>
+      )
+    },
+    meta: {
+      className: "!px-2",
+    },
+    size: 180,
+  },
   {
     accessorKey: "name",
     header: ({ column }) => {
