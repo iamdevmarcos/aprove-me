@@ -56,6 +56,15 @@ jobs:
         working-directory: ${{ env.TF_DIR }}
         run: terraform init
 
+      - name: Import existing firewall if needed
+        working-directory: ${{ env.TF_DIR }}
+        continue-on-error: true
+        run: |
+          terraform import \
+            -var "project_id=${{ env.GCP_PROJECT_ID }}" \
+            google_compute_firewall.prod_ssh \
+            projects/${{ env.GCP_PROJECT_ID }}/global/firewalls/aproveme-prod-ssh || true
+
       - name: Terraform Apply
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve -var "project_id=${{ env.GCP_PROJECT_ID }}"
