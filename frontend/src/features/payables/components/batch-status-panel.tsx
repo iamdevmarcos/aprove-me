@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { payableBatchApi } from "../services/payable-batch-api"
-import type { BatchJobStatus } from "../types/batch"
+import type { BatchJobStatus } from "@/src/features/batch/types"
 import {
   Table,
   TableBody,
@@ -14,6 +14,7 @@ import {
 
 interface BatchStatusPanelProps {
   batchJobId: string
+  onTerminalStatus?: (status: BatchJobStatus) => void
 }
 
 const TERMINAL_STATUSES: BatchJobStatus["status"][] = [
@@ -22,7 +23,10 @@ const TERMINAL_STATUSES: BatchJobStatus["status"][] = [
   "PARTIALLY_FAILED",
 ]
 
-export function BatchStatusPanel({ batchJobId }: BatchStatusPanelProps) {
+export function BatchStatusPanel({
+  batchJobId,
+  onTerminalStatus,
+}: BatchStatusPanelProps) {
   const [status, setStatus] = useState<BatchJobStatus | null>(null)
   const [isPolling, setIsPolling] = useState(true)
 
@@ -35,6 +39,7 @@ export function BatchStatusPanel({ batchJobId }: BatchStatusPanelProps) {
 
       if (TERMINAL_STATUSES.includes(data.status)) {
         setIsPolling(false)
+        onTerminalStatus?.(data)
       }
     }
 
@@ -47,7 +52,7 @@ export function BatchStatusPanel({ batchJobId }: BatchStatusPanelProps) {
     return () => {
       if (intervalId) clearInterval(intervalId)
     }
-  }, [batchJobId, isPolling])
+  }, [batchJobId, isPolling, onTerminalStatus])
 
   if (!status) return null
 

@@ -6,6 +6,16 @@ import { BatchStatusPanel } from "@/src/features/payables/components/batch-statu
 
 export default function PayablesBatchPage() {
   const [batchJobId, setBatchJobId] = useState<string | null>(null)
+  const [isBatchTerminal, setIsBatchTerminal] = useState(false)
+
+  const handleBatchCreated = (id: string) => {
+    setBatchJobId(id)
+    setIsBatchTerminal(false)
+  }
+
+  const handleBatchTerminal = () => {
+    setIsBatchTerminal(true)
+  }
 
   return (
     <div className="container mx-auto px-4 pt-8 pb-4 md:px-6 lg:px-8">
@@ -21,10 +31,15 @@ export default function PayablesBatchPage() {
         </p>
       </div>
 
-      <BatchUploadPanel onBatchCreated={setBatchJobId} />
+      {(!batchJobId || isBatchTerminal) && (
+        <BatchUploadPanel onBatchCreated={handleBatchCreated} />
+      )}
 
       {batchJobId && (
-        <BatchStatusPanel batchJobId={batchJobId} />
+        <BatchStatusPanel
+          batchJobId={batchJobId}
+          onTerminalStatus={handleBatchTerminal}
+        />
       )}
     </div>
   )
