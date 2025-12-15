@@ -54,7 +54,7 @@ apiClient.interceptors.response.use(
 
       if (newToken) {
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
-        return apiClient(originalRequest);
+        return apiClient.request(originalRequest);
       }
     }
 
