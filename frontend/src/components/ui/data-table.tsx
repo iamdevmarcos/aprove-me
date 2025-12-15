@@ -134,7 +134,7 @@ export function DataTable<TData, TValue>({
                     | undefined
 
                   return (
-                    <TableHead
+                    <TableHead 
                       key={header.id}
                       className={meta?.className}
                     >
@@ -164,11 +164,11 @@ export function DataTable<TData, TValue>({
 
                     return (
                       <TableCell key={cell.id} className={meta?.className}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
                     )
                   })}
                 </TableRow>
