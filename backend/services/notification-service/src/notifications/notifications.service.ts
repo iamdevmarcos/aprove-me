@@ -11,15 +11,11 @@ export class NotificationsService {
     );
 
     this.logger.debug(`Email payload: ${JSON.stringify(payload)}`);
-
-    return {
-      status: 'queued',
-      payload,
-    };
+    return { message: 'Email sent' };
   }
 
   sendBatchReport(payload: SendBatchReportPayload) {
-    return this.sendEmail({
+    this.sendEmail({
       to: payload.to,
       subject: `Lote ${payload.batchId ?? 'sem-id'} processado`,
       template: 'batch-processed',
@@ -30,5 +26,7 @@ export class NotificationsService {
         retried: payload.retried,
       },
     });
+
+    return { message: 'Batch report sent' };
   }
 }
