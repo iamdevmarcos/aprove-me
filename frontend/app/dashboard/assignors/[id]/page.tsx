@@ -5,8 +5,7 @@ import { Button } from "@/src/components/ui/button"
 import { useParams } from "next/navigation"
 import { Loading } from "@/src/components/ui/loading"
 import { useAssignor } from "@/src/features/assignors/hooks/use-assignors"
-import { ArrowLeft, Pencil, Trash2 } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ArrowLeft } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
 import { formatDocument } from "@/src/helpers/utils"
 import {
@@ -21,7 +20,6 @@ export default function AssignorDetailsPage() {
   const params = useParams()
   const id = params.id as string
   const { data: assignor, isLoading } = useAssignor(id)
-  const router = useRouter()
 
   if (isLoading) return <Loading />
 
@@ -69,29 +67,11 @@ export default function AssignorDetailsPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href="/dashboard/assignors">
-            <Button variant="outline" size="icon" className="h-9 w-9">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          </Link>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9"
-            onClick={() => router.push(`/dashboard/assignors/${assignor.id}/edit`)}
-          >
-            <Pencil className="h-4 w-4" />
+        <Link href="/dashboard/assignors">
+          <Button variant="outline" size="icon" className="h-9 w-9">
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            // TODO: implementar exclusão de cedente se necessário
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
-        </div>
+        </Link>
       </header>
 
       <hr className="w-full border-t border-gray-200" />

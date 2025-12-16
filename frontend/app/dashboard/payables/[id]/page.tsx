@@ -1,31 +1,19 @@
 'use client'
 
-import Link from 'next/link'
-import { Button } from '@/src/components/ui/button'
-import { useParams } from 'next/navigation'
-import { Loading } from '@/src/components/ui/loading'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { Avatar, AvatarFallback, AvatarImage } from '@/src/components/ui/avatar'
-import { formatDocument } from '@/src/helpers/utils'
+import Link from "next/link"
+import { Button } from "@/src/components/ui/button"
+import { useParams } from "next/navigation"
+import { Loading } from "@/src/components/ui/loading"
+import { ArrowLeft } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/src/components/ui/avatar"
+import { formatDocument } from "@/src/helpers/utils"
 import { CopyButton } from "@/src/components/ui/copy-button"
-import {
-  usePayable,
-  useDeletePayable,
-} from '@/src/features/payables/hooks/use-payables'
-import { EditPayableDrawer } from '@/src/features/payables/components/edit-payable-drawer'
-import { useDrawer } from '@/src/hooks/use-drawer'
-import type { ApiError } from '@/src/services/api/types'
-import { AxiosError } from 'axios'
-import { toast } from 'sonner'
+import { usePayable } from "@/src/features/payables/hooks/use-payables"
 
 export default function PayableDetailsPage() {
   const params = useParams()
   const id = params.id as string
   const { data: payable, isLoading } = usePayable(id)
-  const router = useRouter()
-  const deletePayable = useDeletePayable()
-  const editDrawer = useDrawer()
 
   if (isLoading) {
     return <Loading />
@@ -47,40 +35,8 @@ export default function PayableDetailsPage() {
   }).format(payable.value)
 
   const emissionDate = new Date(payable.emissionDate).toLocaleDateString(
-    'pt-BR'
+    "pt-BR",
   )
-
-  const handleDelete = async () => {
-    if (
-      !confirm(
-        `Tem certeza que deseja excluir este recebível no valor de ${formattedValue}?\n\nEsta ação não pode ser desfeita.`
-      )
-    ) {
-      return
-    }
-
-    try {
-      await deletePayable.mutateAsync(payable.id)
-      toast.success("Recebível excluído com sucesso.")
-      router.push("/dashboard/payables")
-    } catch (error: unknown) {
-      let errorMessage =
-        "Não foi possível excluir o recebível. Tente novamente."
-
-      if (error instanceof AxiosError) {
-        const apiError = error.response?.data as ApiError | undefined
-        if (apiError?.error) {
-          errorMessage = apiError.error
-        } else if (apiError?.message) {
-          errorMessage = apiError.message
-        }
-      } else if (error && typeof error === "object" && "message" in error) {
-        errorMessage = (error as { message?: string }).message || errorMessage
-      }
-
-      toast.error(errorMessage)
-    }
-  }
 
   return (
     <>
@@ -97,29 +53,11 @@ export default function PayableDetailsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Link href="/dashboard/payables">
-              <Button variant="outline" size="icon" className="h-9 w-9">
-                <ArrowLeft className="h-4 w-4" />
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9"
-              onClick={editDrawer.open}
-            >
-              <Pencil className="h-4 w-4" />
+          <Link href="/dashboard/payables">
+            <Button variant="outline" size="icon" className="h-9 w-9">
+              <ArrowLeft className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
+          </Link>
         </header>
 
         <hr className="w-full border-t border-gray-200" />
@@ -187,11 +125,6 @@ export default function PayableDetailsPage() {
         </section>
       </div>
 
-      <EditPayableDrawer
-        open={editDrawer.isOpen}
-        onOpenChange={editDrawer.setIsOpen}
-        payable={payable}
-      />
     </>
   )
 }
