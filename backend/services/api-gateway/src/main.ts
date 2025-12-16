@@ -3,10 +3,15 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { logServiceFromConfig } from './utils/service-logger.util';
 import { setupCors } from './utils/cors.util';
+import { AuthGuard } from './auth/auth.guard';
+import { AuthValidationService } from './auth/auth-validation.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const authValidationService = app.get(AuthValidationService);
+
+  app.useGlobalGuards(new AuthGuard(authValidationService));
 
   const corsOrigin = configService.get<string>('app.corsOrigin') || '*';
   setupCors(app, corsOrigin);

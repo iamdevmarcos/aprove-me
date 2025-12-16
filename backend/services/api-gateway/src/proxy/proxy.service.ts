@@ -97,7 +97,6 @@ export class ProxyService {
           data: formData,
           maxBodyLength: Infinity,
           maxContentLength: Infinity,
-          // Increased timeout for batch operations (30 seconds should be enough since we return 202 quickly)
           timeout: 30000,
         };
 

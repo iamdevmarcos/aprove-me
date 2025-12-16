@@ -23,25 +23,72 @@ function hasStatus(error: unknown): error is ErrorWithStatus {
   );
 }
 
-@Controller('auth')
+@Controller()
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
   @All('*')
-  async proxyAuth(@Req() req: Request, @Body() body: unknown) {
+  async proxy(@Req() req: Request, @Body() body: unknown) {
     const fullPath = req.originalUrl || req.url;
-    const pathAfterAuth = fullPath.replace('/auth', '') || '/';
-    const path = pathAfterAuth === '/' ? '/auth' : '/auth' + pathAfterAuth;
-
     const method = req.method;
-    const authHeader = req.headers?.authorization;
+    const authHeader = req.headers?.authorization || '';
 
     try {
-      return await this.proxyService.proxyToAuthService(
-        path,
-        method,
-        body,
-        authHeader ? { Authorization: authHeader } : {},
+      const path = fullPath.startsWith('/') ? fullPath : `/${fullPath}`;
+      const pathSegments = path.split('/').filter(Boolean);
+      const servicePrefix = pathSegments[0] || '';
+
+      if (servicePrefix === 'auth') {
+        return await this.proxyService.proxyToAuthService(
+          path,
+          method,
+          body,
+          authHeader ? { Authorization: authHeader } : {},
+        );
+      }
+
+      if (servicePrefix === 'integrations') {
+        const isBatchRoute = path.includes('/payable/batch');
+        const contentType = req.headers['content-type'] || 'application/json';
+        const isMultipart = contentType.includes('multipart/form-data');
+
+        if (isBatchRoute && isMultipart && method === 'POST') {
+          return await this.proxyService.proxyToBatchServiceWithStream(
+            path,
+            method,
+            req,
+            authHeader,
+          );
+        }
+
+        const proxyHeaders: Record<string, string> = {
+          Authorization: authHeader,
+        };
+
+        if (isMultipart && !isBatchRoute) {
+          proxyHeaders['content-type'] = contentType;
+        }
+
+        if (isBatchRoute) {
+          return await this.proxyService.proxyToBatchService(
+            path,
+            method,
+            body,
+            proxyHeaders,
+          );
+        }
+
+        return await this.proxyService.proxyToIntegrationsService(
+          path,
+          method,
+          body,
+          proxyHeaders,
+        );
+      }
+
+      throw new HttpException(
+        `Unknown service: ${servicePrefix}`,
+        HttpStatus.NOT_FOUND,
       );
     } catch (error) {
       if (error instanceof HttpException) {

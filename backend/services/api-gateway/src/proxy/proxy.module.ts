@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigModule } from '@nestjs/config';
 import { ProxyController } from './proxy.controller';
-import { IntegrationsProxyController } from './integrations-proxy.controller';
 import { ProxyService } from './proxy.service';
 import { AuthValidationService } from '../auth/auth-validation.service';
 
@@ -14,8 +13,8 @@ import { AuthValidationService } from '../auth/auth-validation.service';
     }),
     ConfigModule,
   ],
-  controllers: [ProxyController, IntegrationsProxyController],
+  controllers: [ProxyController],
   providers: [ProxyService, AuthValidationService],
-  exports: [ProxyService],
+  exports: [ProxyService, AuthValidationService],
 })
 export class ProxyModule {}
