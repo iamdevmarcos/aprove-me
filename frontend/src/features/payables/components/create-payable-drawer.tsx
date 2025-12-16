@@ -41,9 +41,7 @@ export function CreatePayableDrawer({
 
   const onSubmit = async (data: CreatePayableFormData) => {
     try {
-      const unmaskedValue = parseFloat(Mask.removeMoneyInput(data.value.toString()))
-      console.log("Dados do formulário:", { ...data, value: unmaskedValue })
-      await createPayable.mutateAsync({ ...data, value: unmaskedValue })
+      await createPayable.mutateAsync(data)
       reset()
       onOpenChange(false)
       toast.success("Recebível cadastrado com sucesso!")
