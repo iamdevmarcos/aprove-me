@@ -55,7 +55,7 @@ export class ProxyService {
     headers?: Record<string, string>,
   ): Promise<unknown> {
     const url = `${this.batchServiceUrl}${path}`;
-    return this.proxyRequest(url, method, body, headers);
+    return this.proxyRequest(url, method, body, headers, 30000);
   }
 
   async proxyToBatchServiceWithStream(
@@ -97,6 +97,8 @@ export class ProxyService {
           data: formData,
           maxBodyLength: Infinity,
           maxContentLength: Infinity,
+          // Increased timeout for batch operations (30 seconds should be enough since we return 202 quickly)
+          timeout: 30000,
         };
 
         try {
@@ -131,6 +133,7 @@ export class ProxyService {
     method: string,
     body?: unknown,
     headers?: Record<string, string>,
+    timeout?: number,
   ): Promise<unknown> {
     const contentType = headers?.['content-type'] || 'application/json';
 
@@ -146,6 +149,7 @@ export class ProxyService {
       data: body,
       maxBodyLength: Infinity,
       maxContentLength: Infinity,
+      ...(timeout && { timeout }),
     };
 
     try {

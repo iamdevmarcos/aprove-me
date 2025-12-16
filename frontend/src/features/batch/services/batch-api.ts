@@ -14,6 +14,7 @@ export function createBatchApi(basePath: string) {
           headers: {
             "Content-Type": "multipart/form-data",
           },
+          timeout: 30000,
         }
       )
 

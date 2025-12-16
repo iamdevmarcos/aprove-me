@@ -97,12 +97,29 @@ export function BatchUploadPanel({ onBatchCreated }: BatchUploadPanelProps) {
         position: "bottom-right",
         duration: 3000,
       })
-    } catch (error) {
+    } catch (error: any) {
       setUploadState((prev) => ({ ...prev, uploading: false }))
-      toast.error("Não foi possível enviar o arquivo. Tente novamente.", {
-        position: "bottom-right",
-        duration: 3000,
-      })
+      
+      const isTimeout = error.code === 'ECONNABORTED' || error.message?.includes('timeout')
+      const isServiceUnavailable = error.response?.status === 503
+      
+      if (isTimeout || isServiceUnavailable) {
+        toast.warning(
+          "O processamento pode estar em andamento. Verifique o status do lote.",
+          {
+            position: "bottom-right",
+            duration: 5000,
+          }
+        )
+      } else {
+        toast.error(
+          error.response?.data?.message || "Não foi possível enviar o arquivo. Tente novamente.",
+          {
+            position: "bottom-right",
+            duration: 3000,
+          }
+        )
+      }
     }
   }
 
