@@ -42,7 +42,9 @@ apiClient.interceptors.response.use(
       if (originalRequest.url?.includes('/auth')) {
         if (typeof window !== 'undefined') {
           authStorage.removeToken();
-          window.location.href = '/login';
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
         }
 
         return Promise.reject(error);

@@ -24,8 +24,20 @@ export function LoginFormUI({
     formState: { errors, isValid },
   } = form;
 
+  const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      await handleSubmit(onSubmit)(e);
+    } catch {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleFormSubmit} noValidate className="space-y-6">
       <FormInput
         label="Login"
         name="login"
