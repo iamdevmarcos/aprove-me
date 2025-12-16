@@ -1,4 +1,3 @@
--- CreateTable
 CREATE TABLE "batch_jobs" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "fileName" TEXT NOT NULL,
@@ -14,7 +13,6 @@ CREATE TABLE "batch_jobs" (
     "updatedAt" DATETIME NOT NULL
 );
 
--- CreateTable
 CREATE TABLE "batch_items" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "batchJobId" TEXT NOT NULL,
@@ -28,7 +26,6 @@ CREATE TABLE "batch_items" (
     CONSTRAINT "batch_items_batchJobId_fkey" FOREIGN KEY ("batchJobId") REFERENCES "batch_jobs" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
--- CreateTable
 CREATE TABLE "dead_letter_items" (
     "id" TEXT NOT NULL PRIMARY KEY,
     "batchJobId" TEXT NOT NULL,

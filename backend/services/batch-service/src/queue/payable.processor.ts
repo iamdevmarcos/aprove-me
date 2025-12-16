@@ -55,7 +55,12 @@ export class PayableProcessor extends WorkerHost {
       const retryCount = (job.attemptsMade || 0) + 1;
 
       if (retryCount >= 4) {
-        await this.moveToDeadLetter(batchJobId, batchItemId, payableData, error);
+        await this.moveToDeadLetter(
+          batchJobId,
+          batchItemId,
+          payableData,
+          error,
+        );
         await this.incrementFailureCount(batchJobId);
       } else {
         await this.prisma.batchItem.update({

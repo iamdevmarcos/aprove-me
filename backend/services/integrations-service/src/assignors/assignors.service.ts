@@ -156,7 +156,8 @@ export class AssignorsService {
       throw new NotFoundException(`Assignor with id ${id} not found`);
     }
 
-    if (assignor.payables && assignor.payables.length > 0) {
+    const hasLinkedPayables = assignor.payables && assignor.payables.length > 0;
+    if (hasLinkedPayables) {
       throw new ConflictException({
         statusCode: 409,
         message: 'Não é possível excluir cedente com recebíveis vinculados',
